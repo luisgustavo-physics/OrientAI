@@ -1,0 +1,51 @@
+{
+  "id": "autodidata_ia",
+  "name": "Trilha Autodidata — Engenharia de IA & Machine Learning",
+  "description": "Estudo aprofundado e prático de Deep Learning, Arquitetura de LLMs, Sistemas de RAG e MLOps.",
+  "target_date": "2026-12-31",
+  "is_active": true,
+  "subjects": {
+    "deep_learning_scratch": {
+      "id": "deep_learning_scratch",
+      "name": "Deep Learning from Scratch",
+      "subject_type": "computacao",
+      "weight": 3.0,
+      "weekly_questions_goal": 8,
+      "anki_deck": "IA::DeepLearning",
+      "requires_tangible_deliverable": true,
+      "deliverable_templates": [
+        "Implementar camada Linear e função de ativação Softmax com backward pass em NumPy puro",
+        "Construir rede neural MLP com otimizador Adam implementado do zero e treinar no MNIST",
+        "Implementar Attention Mechanism scaled dot-product em PyTorch puro com shapes anotados"
+      ]
+    },
+    "llms_rag": {
+      "id": "llms_rag",
+      "name": "LLMs & Sistemas RAG Avançados",
+      "subject_type": "computacao",
+      "weight": 2.5,
+      "weekly_questions_goal": 6,
+      "anki_deck": "IA::LLMs",
+      "requires_tangible_deliverable": true,
+      "deliverable_templates": [
+        "Construir pipeline de RAG com hybrid search (BM25 + vetorial) e re-ranking via Cross-Encoder",
+        "Implementar agente ReAct com function calling em Python avaliando tempo de inferência e tokens",
+        "Implementar técnica de Context Caching e benchmarking de latência para prompt complexo"
+      ]
+    },
+    "mlops_infra": {
+      "id": "mlops_infra",
+      "name": "MLOps & Deploy de Modelos",
+      "subject_type": "computacao",
+      "weight": 2.0,
+      "weekly_questions_goal": 5,
+      "anki_deck": "IA::MLOps",
+      "requires_tangible_deliverable": true,
+      "deliverable_templates": [
+        "Criar API assíncrona com FastAPI e vLLM/ONNX Runtime para servir modelo com streaming",
+        "Configurar Dockerfile multi-stage e pipeline de CI com testes de validação de modelo",
+        "Implementar monitoramento de data drift e latência de inferência com Prometheus e métricas customizadas"
+      ]
+    }
+  }
+}

@@ -1,0 +1,278 @@
+{
+  "id": "comvest",
+  "name": "Vestibular Unicamp — Comvest",
+  "description": "Matriz oficial de disciplinas do vestibular da Unicamp com árvore de habilidades (DAG) e pré-requisitos progressivos.",
+  "target_date": "2026-10-18",
+  "notebook_id": "nlm_comvest_oficial",
+  "notebook_sources": [
+    "Edital Oficial Unicamp / Comvest 2026",
+    "Provas Comentadas 1ª e 2ª Fase Comvest (2019-2025)",
+    "Manual de Expectativa de Respostas das Bancas de Correção"
+  ],
+  "origin_node": null,
+  "target_node": null,
+  "subjects": {
+    "matematica": {
+      "id": "matematica",
+      "name": "Matemática",
+      "subject_type": "exatas",
+      "weight": 3.0,
+      "weekly_questions_goal": 40,
+      "anki_deck": "Unicamp::Matemática",
+      "requires_tangible_deliverable": true,
+      "deliverable_templates": [
+        "Resolver 6 questões discursivas da 2ª Fase Unicamp com resolução comentada no caderno/notion",
+        "Deduzir e aplicar 3 propriedades analíticas de Geometria/Álgebra em 5 problemas-desafio",
+        "Mapear e resolver lista de 8 exercícios de tópicos recorrentes (Funções, Combinatória, Polinômios)"
+      ]
+    },
+    "fisica": {
+      "id": "fisica",
+      "name": "Física",
+      "subject_type": "exatas",
+      "weight": 2.5,
+      "weekly_questions_goal": 35,
+      "anki_deck": "Unicamp::Física",
+      "requires_tangible_deliverable": true,
+      "deliverable_templates": [
+        "Resolver 5 questões de provas anteriores Unicamp (Mecânica/Termodinâmica/Eletromagnetismo)",
+        "Esquematizar diagrama de forças e equacionar 4 problemas complexos de dinâmica/óptica",
+        "Resolução de lista comentada de 6 exercícios focados em interpretação gráfica e física aplicada"
+      ]
+    },
+    "quimica": {
+      "id": "quimica",
+      "name": "Química",
+      "subject_type": "exatas",
+      "weight": 2.0,
+      "weekly_questions_goal": 30,
+      "anki_deck": "Unicamp::Química",
+      "requires_tangible_deliverable": true,
+      "deliverable_templates": [
+        "Balancear reações e resolver 5 exercícios de estequiometria/soluções com passos de cálculo",
+        "Resolver 5 questões discursivas de Físico-Química ou Química Orgânica (mecanismos e isomeria)"
+      ]
+    },
+    "biologia": {
+      "id": "biologia",
+      "name": "Biologia",
+      "subject_type": "biologicas",
+      "weight": 2.0,
+      "weekly_questions_goal": 25,
+      "anki_deck": "Unicamp::Biologia",
+      "requires_tangible_deliverable": false,
+      "deliverable_templates": [
+        "Criar 10 flashcards no Anki com conceitos-chave e resolver 8 questões de Ecologia/Genética"
+      ]
+    },
+    "historia": {
+      "id": "historia",
+      "name": "História",
+      "subject_type": "humanas",
+      "weight": 2.0,
+      "weekly_questions_goal": 20,
+      "anki_deck": "Unicamp::História",
+      "requires_tangible_deliverable": false,
+      "deliverable_templates": [
+        "Redigir 3 respostas modelo para questões discursivas de História do Brasil com fontes primárias"
+      ]
+    },
+    "geografia": {
+      "id": "geografia",
+      "name": "Geografia",
+      "subject_type": "humanas",
+      "weight": 2.0,
+      "weekly_questions_goal": 20,
+      "anki_deck": "Unicamp::Geografia",
+      "requires_tangible_deliverable": false,
+      "deliverable_templates": [
+        "Analisar 4 gráficos/mapas de demografia/climatologia e responder 6 questões da Unicamp"
+      ]
+    },
+    "filosofia_sociologia": {
+      "id": "filosofia_sociologia",
+      "name": "Filosofia e Sociologia",
+      "subject_type": "humanas",
+      "weight": 1.5,
+      "weekly_questions_goal": 15,
+      "anki_deck": "Unicamp::Humanas",
+      "requires_tangible_deliverable": false,
+      "deliverable_templates": [
+        "Fichamento de conceitos sociológicos clássicos (Durkheim, Marx, Weber) aplicados a 4 questões Comvest"
+      ]
+    },
+    "portugues": {
+      "id": "portugues",
+      "name": "Língua Portuguesa e Literatura",
+      "subject_type": "linguagens",
+      "weight": 2.5,
+      "weekly_questions_goal": 25,
+      "anki_deck": "Unicamp::Literatura",
+      "requires_tangible_deliverable": false,
+      "deliverable_templates": [
+        "Fichamento crítico de uma obra obrigatória da Unicamp + resolução de 4 questões discursivas",
+        "Elaboração de rascunho de proposta de redação Unicamp no gênero textual solicitado"
+      ]
+    },
+    "ingles": {
+      "id": "ingles",
+      "name": "Inglês",
+      "subject_type": "linguagens",
+      "weight": 1.0,
+      "weekly_questions_goal": 15,
+      "anki_deck": "Unicamp::Inglês",
+      "requires_tangible_deliverable": false,
+      "deliverable_templates": [
+        "Leitura crítica de 2 artigos científicos/jornalísticos em inglês e resolução de 6 questões"
+      ]
+    }
+  },
+  "nodes": {
+    "mat_trigo_fund": {
+      "id": "mat_trigo_fund",
+      "name": "Trigonometria Fundamental e Círculo Trigonométrico",
+      "subject": "Matemática",
+      "prerequisites": [],
+      "mastery_threshold": 0.8,
+      "current_accuracy": 0.9,
+      "total_questions": 10,
+      "correct_answers": 9,
+      "status": "MASTERED",
+      "deliverable_template": "Resolver lista de 8 exercícios de arcos e identidades fundamentais no ciclo trigonométrico",
+      "notebook_ref": "Caderno Comvest > Matemática > Ciclo Trigonométrico"
+    },
+    "mat_funcoes": {
+      "id": "mat_funcoes",
+      "name": "Funções, Inequações e Gráficos",
+      "subject": "Matemática",
+      "prerequisites": [],
+      "mastery_threshold": 0.8,
+      "current_accuracy": 1.0,
+      "total_questions": 10,
+      "correct_answers": 10,
+      "status": "MASTERED",
+      "deliverable_template": "Esboçar 5 gráficos de funções compostas/modulares e resolver 6 inequações de vestibulares",
+      "notebook_ref": "Caderno Comvest > Matemática > Teoria das Funções"
+    },
+    "mat_ga_retas": {
+      "id": "mat_ga_retas",
+      "name": "Geometria Analítica: Ponto e Reta",
+      "subject": "Matemática",
+      "prerequisites": [
+        "mat_trigo_fund",
+        "mat_funcoes"
+      ],
+      "mastery_threshold": 0.8,
+      "current_accuracy": 0.0,
+      "total_questions": 0,
+      "correct_answers": 0,
+      "status": "UNLOCKED",
+      "deliverable_template": "Deduzir equação da reta e resolver 6 problemas de distância ponto-reta e paralelismo",
+      "notebook_ref": "Caderno Comvest > Matemática > Geometria Analítica Plana"
+    },
+    "mat_ga_circunf": {
+      "id": "mat_ga_circunf",
+      "name": "Geometria Analítica: Circunferência e Posições Relativas",
+      "subject": "Matemática",
+      "prerequisites": [
+        "mat_ga_retas"
+      ],
+      "mastery_threshold": 0.8,
+      "current_accuracy": 0.0,
+      "total_questions": 0,
+      "correct_answers": 0,
+      "status": "LOCKED",
+      "deliverable_template": "Determinar intersecção reta-circunferência em 6 questões discursivas da 2ª Fase Comvest",
+      "notebook_ref": "Caderno Comvest > Matemática > Cônicas e Circunferência"
+    },
+    "mat_conicas": {
+      "id": "mat_conicas",
+      "name": "Cônicas: Elipse, Hipérbole e Parábola",
+      "subject": "Matemática",
+      "prerequisites": [
+        "mat_ga_circunf"
+      ],
+      "mastery_threshold": 0.8,
+      "current_accuracy": 0.0,
+      "total_questions": 0,
+      "correct_answers": 0,
+      "status": "LOCKED",
+      "deliverable_template": "Construir equações reduzidas e determinar focos, vértices e excentricidade em 5 problemas avançados",
+      "notebook_ref": "Caderno Comvest > Matemática > Cônicas Avançadas"
+    },
+    "fis_cinematica": {
+      "id": "fis_cinematica",
+      "name": "Cinemática Escalar e Vetorial",
+      "subject": "Física",
+      "prerequisites": [],
+      "mastery_threshold": 0.8,
+      "current_accuracy": 0.0,
+      "total_questions": 0,
+      "correct_answers": 0,
+      "status": "UNLOCKED",
+      "deliverable_template": "Equacionar lançamento oblíquo e resolver 6 problemas de movimento relativo e gráficos vxt",
+      "notebook_ref": "Caderno Comvest > Física > Cinemática Vetorial"
+    },
+    "fis_newton": {
+      "id": "fis_newton",
+      "name": "Dinâmica e Leis de Newton",
+      "subject": "Física",
+      "prerequisites": [
+        "fis_cinematica"
+      ],
+      "mastery_threshold": 0.8,
+      "current_accuracy": 0.0,
+      "total_questions": 0,
+      "correct_answers": 0,
+      "status": "LOCKED",
+      "deliverable_template": "Esquematizar diagrama de corpo livre e resolver 5 exercícios de blocos com atrito e polias",
+      "notebook_ref": "Caderno Comvest > Física > Leis de Newton"
+    },
+    "fis_energia": {
+      "id": "fis_energia",
+      "name": "Trabalho, Potência e Conservação da Energia Mecânica",
+      "subject": "Física",
+      "prerequisites": [
+        "fis_newton"
+      ],
+      "mastery_threshold": 0.8,
+      "current_accuracy": 0.0,
+      "total_questions": 0,
+      "correct_answers": 0,
+      "status": "LOCKED",
+      "deliverable_template": "Resolver 6 problemas de conservação de energia com forças dissipativas e molas",
+      "notebook_ref": "Caderno Comvest > Física > Energia e Conservação"
+    },
+    "fis_eletrostatica": {
+      "id": "fis_eletrostatica",
+      "name": "Eletrostática: Força, Campo e Potencial Elétrico",
+      "subject": "Física",
+      "prerequisites": [
+        "fis_energia"
+      ],
+      "mastery_threshold": 0.8,
+      "current_accuracy": 0.0,
+      "total_questions": 0,
+      "correct_answers": 0,
+      "status": "LOCKED",
+      "deliverable_template": "Calcular trabalho da força elétrica e potencial em distribuições pontuais em 5 questões",
+      "notebook_ref": "Caderno Comvest > Física > Eletrostática"
+    },
+    "fis_circuitos": {
+      "id": "fis_circuitos",
+      "name": "Eletrodinâmica: Circuitos Elétricos e Leis de Kirchhoff",
+      "subject": "Física",
+      "prerequisites": [
+        "fis_eletrostatica"
+      ],
+      "mastery_threshold": 0.8,
+      "current_accuracy": 0.0,
+      "total_questions": 0,
+      "correct_answers": 0,
+      "status": "LOCKED",
+      "deliverable_template": "Resolver circuitos complexos com pontes de Wheatstone, geradores reais e leis das malhas",
+      "notebook_ref": "Caderno Comvest > Física > Circuitos Elétricos"
+    }
+  },
+  "is_active": true
+}

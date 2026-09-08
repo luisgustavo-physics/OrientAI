@@ -1,0 +1,64 @@
+{
+  "id": "faculdade_computacao",
+  "name": "Graduação — Ciência / Engenharia da Computação",
+  "description": "Disciplinas acadêmicas do semestre universitário com foco em teoria da computação, matemática discreta e sistemas.",
+  "target_date": "2026-12-15",
+  "is_active": true,
+  "subjects": {
+    "algoritmos_ed": {
+      "id": "algoritmos_ed",
+      "name": "Estruturas de Dados e Algoritmos",
+      "subject_type": "computacao",
+      "weight": 3.0,
+      "weekly_questions_goal": 12,
+      "anki_deck": "Faculdade::Algoritmos",
+      "requires_tangible_deliverable": true,
+      "deliverable_templates": [
+        "Implementar árvore AVL balanceada em C++/Python com testes de inserção e remoção",
+        "Resolver 3 problemas de Programação Dinâmica no LeetCode documentando subestrutura ótima",
+        "Implementar grafo com busca em largura (BFS) e profundidade (DFS) com medição de complexidade"
+      ]
+    },
+    "calculo_integral": {
+      "id": "calculo_integral",
+      "name": "Cálculo Diferencial e Integral",
+      "subject_type": "exatas",
+      "weight": 2.5,
+      "weekly_questions_goal": 20,
+      "anki_deck": "Faculdade::Calculo",
+      "requires_tangible_deliverable": true,
+      "deliverable_templates": [
+        "Resolver 6 exercícios de integração por partes e substituição trigonométrica passo a passo",
+        "Demonstrar e aplicar o Teorema Fundamental do Cálculo em 4 problemas aplicados de física",
+        "Resolver lista de 5 problemas de cálculo de volumes por cascas cilíndricas e sólidos de revolução"
+      ]
+    },
+    "sistemas_operacionais": {
+      "id": "sistemas_operacionais",
+      "name": "Sistemas Operacionais",
+      "subject_type": "computacao",
+      "weight": 2.0,
+      "weekly_questions_goal": 10,
+      "anki_deck": "Faculdade::SO",
+      "requires_tangible_deliverable": true,
+      "deliverable_templates": [
+        "Implementar simulação de algoritmo de escalonamento de processos (Round-Robin e Prioridades) em C",
+        "Escrever programa em C usando pthread com mutex e semáforos para resolver o problema Produtor-Consumidor",
+        "Resolver 5 questões discursivas de gerência de memória virtual e algoritmos de substituição de páginas"
+      ]
+    },
+    "algebra_linear": {
+      "id": "algebra_linear",
+      "name": "Álgebra Linear e Geometria Analítica",
+      "subject_type": "exatas",
+      "weight": 2.0,
+      "weekly_questions_goal": 15,
+      "anki_deck": "Faculdade::AlgebraLinear",
+      "requires_tangible_deliverable": true,
+      "deliverable_templates": [
+        "Calcular autovalores e autovetores de 4 matrizes 3x3 e diagonalizar quando aplicável",
+        "Implementar ortogonalização de Gram-Schmidt em Python via NumPy comparando com resultado analítico"
+      ]
+    }
+  }
+}

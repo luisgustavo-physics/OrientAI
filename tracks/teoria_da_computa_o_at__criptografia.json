@@ -1,0 +1,98 @@
+{
+  "id": "teoria_da_computa_o_at__criptografia",
+  "name": "Teoria da Computação até Criptografia",
+  "description": "Cadeia curricular guiada de 'Teoria da Computação' até 'Criptografia Moderna'.",
+  "target_date": null,
+  "notebook_id": "nlm_teoria_da_computa_o_at__criptografia",
+  "notebook_sources": [],
+  "origin_node": "n01_teoria_da_computa_o_mode",
+  "target_node": "n05_criptografia_moderna_apl",
+  "subjects": {
+    "computacao_teorica": {
+      "id": "computacao_teorica",
+      "name": "Ciência da Computação & Fundamentos",
+      "subject_type": "computacao",
+      "weight": 3.0,
+      "weekly_questions_goal": 15,
+      "anki_deck": null,
+      "requires_tangible_deliverable": true,
+      "deliverable_templates": []
+    }
+  },
+  "nodes": {
+    "n01_teoria_da_computa_o_mode": {
+      "id": "n01_teoria_da_computa_o_mode",
+      "name": "Teoria da Computação: Modelos Formais e Complexidade",
+      "subject": "Ciência da Computação & Fundamentos",
+      "prerequisites": [],
+      "mastery_threshold": 0.8,
+      "current_accuracy": 0.0,
+      "total_questions": 0,
+      "correct_answers": 0,
+      "status": "UNLOCKED",
+      "deliverable_template": "Demonstrar reduções polinomiais e limites assintóticos de complexidade para problemas em P e NP",
+      "notebook_ref": "NotebookLM: Teoria da Computação até Criptografia > Tópico: Teoria da Computação: Modelos Formais e Complexidade"
+    },
+    "n02_aritm_tica_modular_e_teo": {
+      "id": "n02_aritm_tica_modular_e_teo",
+      "name": "Aritmética Modular e Teoria dos Números",
+      "subject": "Ciência da Computação & Fundamentos",
+      "prerequisites": [
+        "n01_teoria_da_computa_o_mode"
+      ],
+      "mastery_threshold": 0.8,
+      "current_accuracy": 0.0,
+      "total_questions": 0,
+      "correct_answers": 0,
+      "status": "LOCKED",
+      "deliverable_template": "Implementar algoritmo estendido de Euclides, exponenciação modular rápida e teste de primalidade Miller-Rabin",
+      "notebook_ref": "NotebookLM: Teoria da Computação até Criptografia > Tópico: Aritmética Modular e Teoria dos Números"
+    },
+    "n03_fundamentos_de_criptogra": {
+      "id": "n03_fundamentos_de_criptogra",
+      "name": "Fundamentos de Criptografia Simétrica",
+      "subject": "Ciência da Computação & Fundamentos",
+      "prerequisites": [
+        "n02_aritm_tica_modular_e_teo"
+      ],
+      "mastery_threshold": 0.8,
+      "current_accuracy": 0.0,
+      "total_questions": 0,
+      "correct_answers": 0,
+      "status": "LOCKED",
+      "deliverable_template": "Implementar cifra de bloco simplificada (SPN) e analisar modos de operação (CBC e GCM) contra ataques de repetição",
+      "notebook_ref": "NotebookLM: Teoria da Computação até Criptografia > Tópico: Fundamentos de Criptografia Simétrica"
+    },
+    "n04_criptografia_assim_trica": {
+      "id": "n04_criptografia_assim_trica",
+      "name": "Criptografia Assimétrica e Troca de Chaves",
+      "subject": "Ciência da Computação & Fundamentos",
+      "prerequisites": [
+        "n03_fundamentos_de_criptogra"
+      ],
+      "mastery_threshold": 0.8,
+      "current_accuracy": 0.0,
+      "total_questions": 0,
+      "correct_answers": 0,
+      "status": "LOCKED",
+      "deliverable_template": "Implementar protocolo Diffie-Hellman e sistema RSA com geração de chaves coprimas em Python puro",
+      "notebook_ref": "NotebookLM: Teoria da Computação até Criptografia > Tópico: Criptografia Assimétrica e Troca de Chaves"
+    },
+    "n05_criptografia_moderna_apl": {
+      "id": "n05_criptografia_moderna_apl",
+      "name": "Criptografia Moderna: Aplicações Avançadas e Provas de Conhecimento Zero",
+      "subject": "Ciência da Computação & Fundamentos",
+      "prerequisites": [
+        "n04_criptografia_assim_trica"
+      ],
+      "mastery_threshold": 0.8,
+      "current_accuracy": 0.0,
+      "total_questions": 0,
+      "correct_answers": 0,
+      "status": "LOCKED",
+      "deliverable_template": "Implementar protótipo funcional de assinatura digital ou esquema ZKP com verificação formal",
+      "notebook_ref": "NotebookLM: Teoria da Computação até Criptografia > Tópico: Criptografia Moderna: Aplicações Avançadas e Provas de Conhecimento Zero"
+    }
+  },
+  "is_active": true
+}
