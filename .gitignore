@@ -3,6 +3,9 @@ __pycache__/
 *.pyc
 .pytest_cache/
 data/
+data/credentials/
+data/credentials/*.json
 .env
 credentials.json
 token.json
+client_secret.json

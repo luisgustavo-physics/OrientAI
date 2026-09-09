@@ -1,5 +1,6 @@
 """Testes unitários para o CurriculumAgent e integração com NotebookLM (core/curriculum.py)."""
 
+# pyrefly: ignore [missing-import]
 import pytest
 
 from core.curriculum import CurriculumAgent
@@ -48,6 +49,7 @@ def test_notebooklm_ancestry_and_briefing():
     )
 
     assert track.notebook_id == "nlm_dl_track"
+    # pyrefly: ignore [bad-index]
     node = track.nodes[track.origin_node]
 
     brief = nlm_client.get_topic_study_brief(track, node)

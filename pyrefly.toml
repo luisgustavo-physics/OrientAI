@@ -1,0 +1,4 @@
+[tool.pyrefly]
+venv = ".venv"
+search-path = [".", "core", "cli", "integrations", "config"]
+ignore-missing-imports = ["*"]

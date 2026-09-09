@@ -1,10 +1,15 @@
 {
-  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+  "python.defaultInterpreterPath": "/home/luis/opt/OrientAI/.venv/bin/python",
+  "python.pythonPath": "/home/luis/opt/OrientAI/.venv/bin/python",
   "python.analysis.extraPaths": [
+    "/home/luis/opt/OrientAI",
+    "/home/luis/opt/OrientAI/.venv/lib/python3.12/site-packages",
     "${workspaceFolder}",
     "${workspaceFolder}/.venv/lib/python3.12/site-packages"
   ],
   "python.autoComplete.extraPaths": [
+    "/home/luis/opt/OrientAI",
+    "/home/luis/opt/OrientAI/.venv/lib/python3.12/site-packages",
     "${workspaceFolder}",
     "${workspaceFolder}/.venv/lib/python3.12/site-packages"
   ]

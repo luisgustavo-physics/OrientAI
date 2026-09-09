@@ -1,13 +1,15 @@
-"""Testes unitários para o ExerciseCurator e integração com GoogleDocsClient."""
+"""Testes unitários para o ExerciseCurator e geração de entregáveis em Markdown e HTML."""
 
-import os
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
+
 import pytest
 
 from core.exercise_curator import ExerciseCurator
+from core.knowledge_store import KnowledgeStore
 from core.models import ExerciseItem, ExerciseList
 from integrations.gdocs_client import GoogleDocsClient
+from integrations.gemini_client import GeminiClient
 
 
 def test_exercise_curator_levels_distribution():
@@ -29,7 +31,6 @@ def test_exercise_curator_levels_distribution():
     assert len(lvl2) == 4
     assert len(lvl3) == 3
 
-    # Verifica se os IDs e gabaritos estão preenchidos
     for ex in exercise_list.exercises:
         assert ex.id
         assert ex.statement
@@ -55,6 +56,69 @@ def test_exercise_curator_source_scope_resolution():
     assert list_custom.source_scope == custom_scope
 
 
+def test_exercise_curator_with_mocked_gemini_client(tmp_path: Path):
+    """Garante que o curator invoca o GeminiClient quando configurado."""
+    mock_gemini = MagicMock(spec=GeminiClient)
+    mock_gemini.is_configured.return_value = True
+
+    # Cria uma lista válida de resposta mockada
+    mock_list = ExerciseCurator()._generate_fallback_list(
+        topic_name="Álgebra Linear: Autovalores",
+        track_id="faculdade_computacao",
+        scope="Steinbruch",
+        target_accuracy=0.85
+    )
+    mock_gemini.generate_structured.return_value = mock_list
+
+    ks = KnowledgeStore(sources_base_dir=tmp_path / "sources")
+    ks.add_source_text("faculdade_computacao", "autovalores.md", "Teorema Espectral e Matrizes Simétricas")
+
+    curator = ExerciseCurator(gemini_client=mock_gemini, knowledge_store=ks)
+    result = curator.curate_exercise_list(
+        topic_name="Álgebra Linear: Autovalores",
+        track_id="faculdade_computacao"
+    )
+
+    assert result == mock_list
+    mock_gemini.generate_structured.assert_called_once()
+    # Verifica se a chamada continha instrução com grounding
+    call_kwargs = mock_gemini.generate_structured.call_args.kwargs
+    assert "system_instruction" in call_kwargs
+    assert "BASE DE CONHECIMENTO ANCORADA" in call_kwargs["system_instruction"]
+
+
+def test_exercise_curator_save_worksheet_md_and_html(tmp_path: Path):
+    """Testa a geração e escrita dos arquivos .md e .html em diretório especificado."""
+    curator = ExerciseCurator()
+    exercise_list = curator.curate_exercise_list(
+        topic_name="Cálculo I: Integrais Definidas",
+        track_id="faculdade_computacao"
+    )
+
+    out_dir = tmp_path / "worksheets"
+    md_path, html_path = curator.save_worksheet(
+        exercise_list=exercise_list,
+        output_dir=out_dir,
+        generate_html=True
+    )
+
+    assert md_path.exists()
+    assert md_path.name == "faculdade_computacao_calculo_i_integrais_definidas.md"
+    md_content = md_path.read_text(encoding="utf-8")
+    assert "OrientAI — Lista de Exercícios" in md_content
+    assert "Integrais Definidas" in md_content
+    assert "Gabarito Oficial e Critérios de Correção" in md_content
+
+    assert html_path is not None
+    assert html_path.exists()
+    assert html_path.name == "faculdade_computacao_calculo_i_integrais_definidas.html"
+    html_content = html_path.read_text(encoding="utf-8")
+    assert "<!DOCTYPE html>" in html_content
+    assert "Integrais Definidas" in html_content
+    assert "Gabarito Oficial & Critérios de Correção" in html_content
+    assert "@media print" in html_content
+
+
 def test_exercise_list_pydantic_validation_fails_on_imbalance():
     """Garante que o validador do Pydantic rejeita listas com distribuição incorreta de níveis."""
     items = [
@@ -72,56 +136,13 @@ def test_exercise_list_pydantic_validation_fails_on_imbalance():
         )
 
 
-def test_gdocs_client_graceful_fallback_to_markdown(tmp_path):
-    """Testa o fallback para Markdown local quando credentials.json não existe."""
+def test_gdocs_client_local_export(tmp_path: Path):
+    """Garante que GoogleDocsClient exporta via geração local sem necessidade de OAuth."""
     curator = ExerciseCurator()
-    exercise_list = curator.curate_exercise_list(
-        topic_name="Cálculo I: Integrais Definidas",
-        track_id="faculdade_computacao"
-    )
+    exercise_list = curator.curate_exercise_list("Álgebra", "faculdade_computacao")
 
-    worksheets_test_dir = tmp_path / "worksheets"
-    client = GoogleDocsClient(
-        credentials_path=str(tmp_path / "non_existent_credentials.json"),
-        token_path=str(tmp_path / "non_existent_token.json"),
-        worksheets_dir=str(worksheets_test_dir)
-    )
+    client = GoogleDocsClient(worksheets_dir=str(tmp_path / "worksheets"))
+    result_path = client.create_exercise_doc("Lista Álgebra", exercise_list)
 
-    result_path = client.create_exercise_doc(
-        title="OrientAI — Lista de Exercícios: Integrais Definidas",
-        exercise_list=exercise_list
-    )
-
-    assert not result_path.startswith("http")
-    assert os.path.exists(result_path)
+    assert Path(result_path).exists()
     assert result_path.endswith(".md")
-
-    content = Path(result_path).read_text(encoding="utf-8")
-    assert "OrientAI — Lista de Exercícios Tangíveis" in content
-    assert "Integrais Definidas" in content
-    assert "Nível 1" in content
-    assert "Nível 2" in content
-    assert "Nível 3" in content
-    assert "Gabarito Oficial e Critérios de Correção" in content
-    assert "RASCUNHO / DEMONSTRAÇÃO DISCURSIVA" in content
-
-
-def test_gdocs_client_mock_remote_creation():
-    """Testa a criação no Google Docs quando os serviços estão autenticados (mockados)."""
-    curator = ExerciseCurator()
-    exercise_list = curator.curate_exercise_list("Álgebra Linear", "faculdade_computacao")
-
-    client = GoogleDocsClient()
-
-    mock_docs = MagicMock()
-    mock_drive = MagicMock()
-
-    mock_docs.documents().create().execute.return_value = {"documentId": "mock_doc_id_12345"}
-    mock_docs.documents().batchUpdate().execute.return_value = {}
-
-    with patch.object(client, "_get_services", return_value=(mock_docs, mock_drive)):
-        url = client.create_exercise_doc("Lista Álgebra", exercise_list)
-
-        assert url == "https://docs.google.com/document/d/mock_doc_id_12345/edit"
-        mock_docs.documents().create.assert_called()
-        mock_docs.documents().batchUpdate.assert_called()

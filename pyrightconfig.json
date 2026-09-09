@@ -1,7 +1,9 @@
 {
-  "venvPath": ".",
+  "venvPath": "/home/luis/opt/OrientAI",
   "venv": ".venv",
   "extraPaths": [
+    "/home/luis/opt/OrientAI",
+    "/home/luis/opt/OrientAI/.venv/lib/python3.12/site-packages",
     ".",
     "./.venv/lib/python3.12/site-packages"
   ]

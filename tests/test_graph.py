@@ -1,5 +1,6 @@
 """Testes unitários para o motor de topologia em grafo (DAG) e progressão (core/graph_engine.py)."""
 
+# pyrefly: ignore [missing-import]
 import pytest
 
 from core.graph_engine import GraphEngine

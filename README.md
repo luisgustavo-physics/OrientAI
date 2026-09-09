@@ -86,8 +86,11 @@ source .venv/bin/activate
 # Instalar dependências
 .venv/bin/pip install -r requirements.txt
 
-# Configurar variáveis de ambiente
-cp .env.example .env
+# Configurar chave do Google AI Studio (Gemini API)
+python main.py auth setup-key --key AIzaSy...
+
+# Verificar status da conexão
+python main.py auth status
 ```
 
 ### 4.2. Execução dos Testes Unitários
@@ -95,14 +98,26 @@ cp .env.example .env
 ```bash
 .venv/bin/pytest -v
 ```
-*(28 testes unitários cobrindo Curadoria de Exercícios, Google Docs, DAGs, validação de ciclos, CurriculumAgent, NotebookLM, Scheduler, Métricas e Anki).*
+*(44 testes unitários cobrindo Curadoria de Exercícios com GeminiClient, KnowledgeStore com Grounding Local, GoogleAuthManager, DAGs, validação de ciclos, CurriculumAgent, NotebookLM, Scheduler, Métricas e Anki).*
 
 
 ---
 
 ## 💻 5. Guia Completo de Uso da CLI
 
-### 🌳 1. Visualizar Árvore de Habilidades em Grafo (`track tree`)
+### 🔑 1. Configurar e Testar Chave do Google AI Studio (`auth setup-key`)
+
+O OrientAI opera 100% via chave de API do **Google AI Studio** (`GEMINI_API_KEY`), sem necessidade de OAuth 2.0, telas de consentimento do GCP ou arquivos `client_secret.json`:
+
+```bash
+# Configurar diretamente via flag
+python main.py auth setup-key --key "AIzaSy..."
+
+# Ou verificar o status e conectividade da chave ativa
+python main.py auth status
+```
+
+### 🌳 2. Visualizar Árvore de Habilidades em Grafo (`track tree`)
 
 Renderiza a topologia do grafo da trilha via terminal com cores e ícones de status (`DOMINADO`, `DESBLOQUEADO`, `BLOQUEADO`):
 
@@ -110,7 +125,7 @@ Renderiza a topologia do grafo da trilha via terminal com cores e ícones de sta
 python main.py track tree --track comvest
 ```
 
-### ✨ 2. Gerar Trilha Guiada com o Agente Curricular (`track generate`)
+### ✨ 3. Gerar Trilha Guiada com o Agente Curricular (`track generate`)
 
 Gera uma nova trilha em grafo do zero a partir de um ponto de origem e um destino:
 
@@ -121,9 +136,9 @@ python main.py track generate \
   --to "Criptografia Moderna"
 ```
 
-### 📄 3. Curadoria de Exercícios e Integração Google Docs (`sheet generate`)
+### 📄 4. Curadoria de Exercícios e Geração de Entregáveis (`sheet generate`)
 
-Gera listas pedagógicas estruturadas em 3 níveis (Básico, Intermediário e Avançado) exportando diretamente para o Google Docs (com fallback gracioso em Markdown):
+Gera listas pedagógicas estruturadas em 3 níveis (Básico, Intermediário e Avançado) ancoradas nas fontes da trilha (`tracks/sources/<track_id>/`), salvando automaticamente em `.md` e `.html` limpos em `data/worksheets/` com pré-visualização formatada no terminal:
 
 ```bash
 # Curadoria padrão para banca Comvest / Unicamp

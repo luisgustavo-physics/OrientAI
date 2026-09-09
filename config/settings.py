@@ -45,6 +45,14 @@ class Settings(BaseSettings):
     unicamp_stage_2_date: date = date(2026, 11, 29)
     target_course: str = "Engenharia de Computação / Ciência da Computação"
     
+    # Google AI Studio (Gemini)
+    gemini_api_key: Optional[str] = None
+    gemini_model: str = "gemini-2.5-flash"
+
+    # Diretórios de Fontes e Worksheets
+    sources_dir: Path = Path("tracks/sources")
+    worksheets_dir: Path = Path("data/worksheets")
+
     # Parâmetros de Estudo
     daily_study_hours: float = 5.0
     pomodoro_work_minutes: int = 50
@@ -75,6 +83,18 @@ class Settings(BaseSettings):
         return path
 
     @property
+    def resolved_sources_dir(self) -> Path:
+        path = self.base_dir / self.sources_dir
+        path.mkdir(parents=True, exist_ok=True)
+        return path
+
+    @property
+    def resolved_worksheets_dir(self) -> Path:
+        path = self.base_dir / self.worksheets_dir
+        path.mkdir(parents=True, exist_ok=True)
+        return path
+
+    @property
     def state_file(self) -> Path:
         return self.resolved_data_dir / "state.json"
 
@@ -87,6 +107,20 @@ class Settings(BaseSettings):
     @property
     def anki_queue_file(self) -> Path:
         return self.resolved_data_dir / "anki_queue.json"
+
+    @property
+    def credentials_dir(self) -> Path:
+        path = self.resolved_data_dir / "credentials"
+        path.mkdir(parents=True, exist_ok=True)
+        return path
+
+    @property
+    def google_client_secret_file(self) -> Path:
+        return self.credentials_dir / "client_secret.json"
+
+    @property
+    def google_token_file(self) -> Path:
+        return self.credentials_dir / "token.json"
 
 
 _settings_instance: Optional[Settings] = None

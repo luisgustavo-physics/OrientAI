@@ -6,7 +6,9 @@ import sys
 from typing import List, Optional
 
 from rich.console import Console
+from rich.markdown import Markdown
 from rich.panel import Panel
+from rich.prompt import Prompt
 from rich.table import Table
 from rich.text import Text
 from rich.tree import Tree
@@ -15,6 +17,7 @@ from config.settings import Settings, get_settings
 from core.curriculum import CurriculumAgent
 from core.exercise_curator import ExerciseCurator
 from core.graph_engine import GraphEngine
+from core.knowledge_store import KnowledgeStore
 from core.metrics import MetricsEngine
 from core.models import StudyLog, StudyTrack, SubjectConfig, TopicNode, TopicStatus
 from core.scheduler import StudyScheduler
@@ -22,6 +25,8 @@ from core.state import StateManager
 from core.tracks import TrackManager
 from integrations.anki_sync import AnkiClient
 from integrations.gdocs_client import GoogleDocsClient
+from integrations.gemini_client import GeminiClient, get_gemini_client
+from integrations.google_auth import GoogleAuthManager
 from integrations.notebooklm import NotebookLMClient
 
 console = Console()
@@ -573,11 +578,12 @@ def handle_report(args: argparse.Namespace) -> None:
 
 
 def handle_sheet_generate(args: argparse.Namespace) -> None:
-    """Gera uma lista de exercícios curada em 3 níveis e exporta para o Google Docs (com fallback local em Markdown)."""
+    """Gera uma lista de exercícios curada em 3 níveis e salva em Markdown e HTML limpo com preview no terminal."""
     settings = get_settings()
     tm = TrackManager(settings)
-    curator = ExerciseCurator()
-    gdocs = GoogleDocsClient()
+    gemini_client = get_gemini_client(settings)
+    knowledge_store = KnowledgeStore(settings=settings)
+    curator = ExerciseCurator(gemini_client=gemini_client, knowledge_store=knowledge_store, settings=settings)
 
     topic_name = args.topic.strip() if args.topic else None
     track_id = args.track.strip() if args.track else None
@@ -594,19 +600,18 @@ def handle_sheet_generate(args: argparse.Namespace) -> None:
         else:
             track_id = "geral"
 
-    with console.status(f"[bold green]Curando questões pedagógicas e estruturando lista para '{topic_name}' ({track_id})...[/bold green]"):
+    with console.status(f"[bold green]Curando questões e aplicando Grounding para '{topic_name}' ({track_id})...[/bold green]"):
         exercise_list = curator.curate_exercise_list(
             topic_name=topic_name,
             track_id=track_id,
             source_scope=source_scope
         )
 
-    title = f"OrientAI — Lista de Exercícios: {topic_name} ({track_id.upper()})"
-
-    with console.status("[bold green]Criando documento estilizado no Google Docs...[/bold green]"):
-        result_url_or_path = gdocs.create_exercise_doc(title=title, exercise_list=exercise_list)
-
-    is_remote = result_url_or_path.startswith("http")
+    with console.status("[bold green]Salvando entregáveis em Markdown e HTML limpo...[/bold green]"):
+        md_path, html_path = curator.save_worksheet(
+            exercise_list=exercise_list,
+            generate_html=True
+        )
 
     panel_text = Text()
     panel_text.append("✨ Lista de Exercícios Tangíveis Gerada com Sucesso!\n\n", style="bold green")
@@ -616,15 +621,158 @@ def handle_sheet_generate(args: argparse.Namespace) -> None:
     panel_text.append(f"📊 Composição: 3 N1 (Básico) + 4 N2 (Intermediário) + 3 N3 (Avançado) = 10 Questões\n", style="yellow")
     panel_text.append(f"🎯 Meta de Acertos: {int(exercise_list.target_accuracy * 100)}% (Anti-Passividade)\n\n", style="bold magenta")
 
-    if is_remote:
-        panel_text.append("📄 Google Docs Criado:\n", style="bold white")
-        panel_text.append(f"🔗 {result_url_or_path}\n", style="bold underline cyan")
-    else:
-        panel_text.append("📂 Fallback Local Ativado (Credenciais Google não detectadas):\n", style="bold yellow")
-        panel_text.append(f"📄 Arquivo Markdown: {result_url_or_path}\n\n", style="bold underline green")
-        panel_text.append("💡 Dica: Para criar diretamente no Google Drive, configure o arquivo 'credentials.json'.\n", style="dim")
+    panel_text.append("📄 Entregável Markdown:\n", style="bold white")
+    panel_text.append(f"📁 {md_path}\n\n", style="bold underline green")
+
+    if html_path:
+        panel_text.append("🌐 Versão HTML (pronta para impressão / Google Docs / Obsidian):\n", style="bold white")
+        panel_text.append(f"📁 {html_path}\n", style="bold underline cyan")
 
     console.print(Panel(panel_text, title="🎯 OrientAI • Curador de Exercícios", border_style="cyan"))
+
+    # Pré-visualização rica no terminal
+    console.print("\n[bold cyan]─── PRÉ-VISUALIZAÇÃO DA LISTA NO TERMINAL ───[/bold cyan]\n")
+    try:
+        md_content = md_path.read_text(encoding="utf-8")
+        console.print(Markdown(md_content))
+    except Exception as e:
+        console.print(f"[dim]Não foi possível renderizar pré-visualização completa: {e}[/dim]")
+
+
+def handle_auth_setup_key(args: argparse.Namespace) -> None:
+    """Configura e valida a chave de API do Google AI Studio (GEMINI_API_KEY)."""
+    settings = get_settings()
+    render_banner(settings)
+    auth = GoogleAuthManager(settings)
+
+    key = getattr(args, "key", None)
+    if key:
+        key = key.strip()
+
+    if not key:
+        current_key = auth.get_api_key()
+        prompt_text = "🔑 Insira sua GEMINI_API_KEY do Google AI Studio"
+        if current_key:
+            masked = f"{current_key[:6]}...{current_key[-4:]}" if len(current_key) > 10 else "***"
+            prompt_text += f" (Atual: {masked}, pressione Enter para manter)"
+
+        try:
+            entered = Prompt.ask(prompt_text, password=True)
+            if entered and entered.strip():
+                key = entered.strip()
+            elif current_key:
+                key = current_key
+        except (KeyboardInterrupt, EOFError):
+            console.print("\n[yellow]Operação cancelada pelo usuário.[/yellow]")
+            return
+
+    if not key:
+        console.print(Panel(
+            "[bold red]Nenhuma chave informada![/bold red]\n\n"
+            "Para obter sua chave gratuita do Google AI Studio, acesse:\n"
+            "[bold cyan]https://aistudio.google.com/app/apikey[/bold cyan]\n\n"
+            "Em seguida, configure com:\n"
+            "[bold green]python main.py auth setup-key --key AIzaSy...[/bold green]",
+            title="❌ Chave Ausente",
+            border_style="red"
+        ))
+        return
+
+    # Salva chave no .env
+    auth.save_api_key(key)
+
+    # Testa chave com ping no Google AI Studio
+    with console.status("[bold green]Testando conectividade com Google AI Studio (ping)...[/bold green]"):
+        success, msg = auth.test_key(key)
+
+    if success:
+        status = auth.get_status()
+        panel_text = Text()
+        panel_text.append("🎉 Google AI Studio Configurado com Sucesso!\n\n", style="bold green")
+        panel_text.append(f"🔑 Chave Cadastrada: {status['masked_key']}\n", style="bold white")
+        panel_text.append(f"🤖 Modelo Padrão: {status['model']}\n", style="cyan")
+        panel_text.append(f"📁 Salvo no arquivo: {status['env_file']}\n", style="dim")
+        panel_text.append(f"📡 Status da Conexão: {msg}\n\n", style="green")
+        panel_text.append("Toda a inteligência do OrientAI agora opera sem dependência de OAuth.", style="dim")
+        console.print(Panel(panel_text, title="🎯 OrientAI • Google AI Studio", border_style="green"))
+    else:
+        console.print(Panel(
+            f"[bold red]Falha no teste da chave do Google AI Studio:[/bold red]\n{msg}\n\n"
+            "A chave foi salva no seu .env, mas o ping na API falhou.\n"
+            "Verifique sua conexão ou se a chave está ativa em:\n"
+            "[bold cyan]https://aistudio.google.com/app/apikey[/bold cyan]",
+            title="⚠️ Aviso de Conexão",
+            border_style="yellow"
+        ))
+
+
+def handle_auth_login(args: argparse.Namespace) -> None:
+    """Configura a chave do Google AI Studio (substituto do fluxo OAuth)."""
+    handle_auth_setup_key(args)
+
+
+def handle_auth_status(args: argparse.Namespace) -> None:
+    """Exibe o status da GEMINI_API_KEY e conectividade com Google AI Studio."""
+    settings = get_settings()
+    render_banner(settings)
+    auth = GoogleAuthManager(settings)
+    status = auth.get_status()
+
+    table = Table(
+        title="Estado da Autenticação Google AI Studio (Gemini API)",
+        border_style="cyan",
+        show_header=True,
+        header_style="bold magenta"
+    )
+    table.add_column("Propriedade", style="bold white", width=28)
+    table.add_column("Valor / Status", style="cyan")
+
+    if status["authenticated"]:
+        table.add_row("Status da Chave", "[bold green]CONFIGURADA (Ativa)[/bold green]")
+        table.add_row("Chave GEMINI_API_KEY", f"[bold yellow]{status['masked_key']}[/bold yellow]")
+    else:
+        table.add_row("Status da Chave", "[bold red]NÃO CONFIGURADA[/bold red]")
+        table.add_row("Chave GEMINI_API_KEY", "[dim]Ausente ou vazia[/dim]")
+
+    table.add_row("Modelo Gemini", f"[bold cyan]{status['model']}[/bold cyan]")
+    table.add_row("Arquivo de Configuração", f"{status['env_file']}")
+    table.add_row("Diretório de Fontes (Grounding)", f"{settings.resolved_sources_dir}")
+    table.add_row("Diretório de Worksheets", f"{settings.resolved_worksheets_dir}")
+
+    if status["authenticated"]:
+        with console.status("[bold green]Testando conectividade em tempo real com fallback...[/bold green]"):
+            ping_ok, ping_msg = auth.test_key()
+        table.add_row(
+            "Conexão / Ping API",
+            f"[bold green]{ping_msg}[/bold green]" if ping_ok else f"[bold red]Falha ({ping_msg})[/bold red]"
+        )
+
+    console.print(table)
+    if not status["authenticated"]:
+        console.print("[dim]Para configurar sua chave do Google AI Studio, execute:[/dim] [bold green]python main.py auth setup-key[/bold green]\n")
+
+
+def handle_auth_logout(args: argparse.Namespace) -> None:
+    """Remove a GEMINI_API_KEY do arquivo .env e da sessão ativa."""
+    settings = get_settings()
+    render_banner(settings)
+    auth = GoogleAuthManager(settings)
+
+    if not auth.get_api_key():
+        console.print("[yellow]Nenhuma chave GEMINI_API_KEY configurada. Nada para remover.[/yellow]")
+        return
+
+    deleted = auth.logout()
+    if deleted:
+        console.print(Panel(
+            "🚪 [bold green]Chave GEMINI_API_KEY removida com sucesso![/bold green]\n\n"
+            "A chave foi desvinculada do arquivo .env.\n"
+            "Para cadastrar uma nova chave, use: [bold cyan]python main.py auth setup-key[/bold cyan]",
+            title="Chave Removida",
+            border_style="green"
+        ))
+    else:
+        console.print("[red]Erro ao tentar remover a chave do arquivo .env.[/red]")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -689,7 +837,7 @@ def build_parser() -> argparse.ArgumentParser:
     status_parser.add_argument("--track", "-k", help="Filtra a visualização para uma trilha específica")
 
     # Comando 'sheet'
-    sheet_parser = subparsers.add_parser("sheet", help="Curadoria de exercícios e geração de listas no Google Docs")
+    sheet_parser = subparsers.add_parser("sheet", help="Curadoria de exercícios e geração de listas em Markdown e HTML")
     sheet_sub = sheet_parser.add_subparsers(dest="sheet_action")
     sheet_gen = sheet_sub.add_parser("generate", help="Gera lista de exercícios nos 3 níveis pedagógicos")
     sheet_gen.add_argument("--topic", "-t", required=True, help="Nome do tópico ou habilidade")
@@ -705,6 +853,19 @@ def build_parser() -> argparse.ArgumentParser:
     # Comando 'report'
     report_parser = subparsers.add_parser("report", help="Exporta relatórios analíticos")
     report_parser.add_argument("--weekly", "-w", action="store_true", help="Gera relatório semanal comparativo")
+
+    # Comando 'auth'
+    auth_parser = subparsers.add_parser("auth", help="Gerencia chave de API do Google AI Studio (Gemini)")
+    auth_sub = auth_parser.add_subparsers(dest="auth_action")
+
+    setup_key = auth_sub.add_parser("setup-key", help="Cadastra e testa a chave de API do Google AI Studio")
+    setup_key.add_argument("--key", "-k", help="Chave GEMINI_API_KEY (opcional, pode ser informada interativamente)")
+
+    login_p = auth_sub.add_parser("login", help="Configura e valida a chave do Google AI Studio")
+    login_p.add_argument("--key", "-k", help="Chave GEMINI_API_KEY (opcional, pode ser informada interativamente)")
+
+    auth_sub.add_parser("status", help="Verifica se a GEMINI_API_KEY está configurada e operacional")
+    auth_sub.add_parser("logout", help="Remove a chave GEMINI_API_KEY do .env")
 
     return parser
 
@@ -751,6 +912,16 @@ def run_cli() -> None:
         handle_card(args)
     elif args.command == "report":
         handle_report(args)
+    elif args.command == "auth":
+        if args.auth_action in ("setup-key", "login"):
+            handle_auth_setup_key(args)
+        elif args.auth_action == "status":
+            handle_auth_status(args)
+        elif args.auth_action == "logout":
+            handle_auth_logout(args)
+        else:
+            parser.parse_args(["auth", "--help"])
     else:
         parser.print_help()
+
 
